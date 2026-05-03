@@ -1,58 +1,191 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🔐 Laravel Sanctum API - Inventory & Order System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a Laravel REST API project using Laravel Sanctum for authentication.
+It provides secure endpoints for managing users, products, and orders.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* 🔐 Authentication using Laravel Sanctum (Token-based)
+* 👤 User Login & Logout
+* 📦 Product Management (CRUD)
+* 🛒 Order Management
+* 🔒 Protected API Routes
+* 🌐 RESTful API Structure
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🛠️ Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* Laravel (Backend Framework)
+* Laravel Sanctum (Authentication)
+* MySQL (Database)
+* REST API
+* Eloquent ORM
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 📦 Installation
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Clone the repository:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/thawzin777/laravel_sanctum_api.git
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Go to project folder:
 
-## Contributing
+```bash id="6mtg6y"
+cd laravel_sanctum_api
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Install dependencies:
 
-## Code of Conduct
+```bash id="g8y7y1"
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## ⚙️ Environment Setup
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Copy `.env` file:
 
-## License
+```bash id="9v7vyo"
+cp .env.example .env
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Generate app key:
+
+```bash id="b2d3nx"
+php artisan key:generate
+```
+
+---
+
+## 🗄️ Database Setup
+
+Update `.env` with your database config:
+
+```env id="3t9q1p"
+DB_DATABASE=your_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Run migrations:
+
+```bash id="2z3l8x"
+php artisan migrate
+```
+
+---
+
+## 🔑 Sanctum Setup
+
+Install Sanctum (if not installed):
+
+```bash id="m8y2kz"
+php artisan install:api
+```
+
+👉 Sanctum allows issuing API tokens and securing routes.
+
+---
+
+## ▶️ Run Server
+
+```bash id="k3v8d1"
+php artisan serve
+```
+
+Server will run at:
+http://localhost:8000
+
+---
+
+## 🔌 API Endpoints (Example)
+
+| Method | Endpoint      | Description      |
+| ------ | ------------- | ---------------- |
+| POST   | /api/login    | User login       |
+| POST   | /api/logout   | User logout      |
+| GET    | /api/products | Get all products |
+| POST   | /api/orders   | Create order     |
+
+---
+
+## 🔐 Authentication
+
+Use Bearer Token in headers:
+
+```id="xk8n2d"
+Authorization: Bearer YOUR_TOKEN
+```
+
+---
+
+## 📸 Screenshots
+
+(Add Postman or API response screenshots here)
+
+---
+
+## 🎥 Demo Video
+
+(Add your demo video link here)
+
+Example:
+https://youtu.be/your-demo-link
+
+---
+
+## 🧪 API Testing
+
+You can test API using:
+
+* Postman
+* Thunder Client (VS Code Extension)
+
+---
+
+## 📁 Project Structure (Simplified)
+
+```id="y3n8kp"
+app/
+ ├── Models/
+ ├── Http/Controllers/
+ ├── Http/Middleware/
+routes/
+ ├── api.php
+database/
+ ├── migrations/
+```
+
+---
+
+## 👨‍💻 Author
+
+* Thaw Zin
+
+---
+
+## 📌 Notes
+
+* Make sure database is running
+* Do not commit `.env`
+* Use correct API base URL in frontend
+
+---
+
+## 🌐 Frontend Repo
+
+Frontend (Vue):
+https://github.com/thawzin777/frontend-vue
+
+---
+
+## 📄 License
+
+This project is for learning and portfolio purposes.
