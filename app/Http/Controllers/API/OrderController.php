@@ -33,6 +33,7 @@ class OrderController extends BaseController
         return $this->sendResponse($orders, 'Orders retrieved successfully.');
     }
 
+
    public function store(Request $request)
 {
     $validated = Validator::make($request->all(), [
@@ -44,66 +45,90 @@ class OrderController extends BaseController
     if ($validated->fails()) {
         return $this->sendError('Validation Error.', $validated->errors(), 422);
     }
-
-    DB::beginTransaction();
-
-    try {
-
-        $totalPrice = 0;
-
-        // 1. Create order
-        $orderId = DB::table('orders')->insertGetId([
-            'user_id' => auth()->id() ?? 1,
-            'total_price' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        foreach ($validated->validated()['items'] as $item) {
-
-            // ✔ use Eloquent (IMPORTANT FIX)
-           // $product = Product::find($item['product_id']);
-            $product=DB::table('products')->where('id', $item['product_id'])->first();
-            if ($product->stock < $item['quantity']) {
-                return $this->sendError('Insufficient stock for ' . $product->name, [], 400);
+    
+    $validatedData = $validated->validated();
+    
+    try{
+        DB::transaction(function () use($validatedData) {
+            
+            // Find existing order for today
+            $existOrder = DB::table('orders')
+                ->where('user_id', auth()->id())
+                ->whereDate('created_at', today())
+                ->first();
+                
+            if(!$existOrder){
+                $orderId = DB::table('orders')->insertGetId([
+                    'user_id' => auth()->id(),
+                    'total_price' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                $orderId = $existOrder->id;
             }
-
-            $price = $product->price;
-            $subtotal = $price * $item['quantity'];
-
-            // 2. insert order items
-            DB::table('order_items')->insert([
-                'order_id' => $orderId,
-                'product_id' => $product->id,
-                'quantity' => $item['quantity'],
-                'price' => $price,
-                'created_at' => now(),
+            
+            foreach ($validatedData['items'] as $item) {
+                // Get product
+                $product = DB::table('products')->where('id', $item['product_id'])->first();
+                
+                if ($product->stock < $item['quantity']) {
+                    throw new \Exception('Insufficient stock for ' . $product->name);
+                }
+                
+                $price = $product->price;
+                
+                // Check if order item already exists
+                $existOrderItem = DB::table('order_items')
+                    ->where('order_id', $orderId)
+                    ->where('product_id', $item['product_id'])
+                    ->first();
+                
+                if($existOrderItem){
+                    // Update existing item - quantity
+                    $newQty = $existOrderItem->quantity + $item['quantity'];
+                    $newPrice = $newQty * $price;
+                    
+                    DB::table('order_items')
+                        ->where('id', $existOrderItem->id)
+                        ->update([
+                            'quantity' => $newQty,
+                            'price' => $newPrice,
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    // Insert new item
+                    DB::table('order_items')->insert([
+                        'order_id' => $orderId,
+                        'product_id' => $product->id,
+                        'quantity' => $item['quantity'],
+                        'price' => $price * $item['quantity'], 
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+                
+                // Deduct stock
+                DB::table('products')
+                    ->where('id', $product->id)
+                    ->decrement('stock', $item['quantity']);
+            }
+            
+            //  total price 
+            $totalPrice = DB::table('order_items')
+                ->where('order_id', $orderId)
+                ->sum('price');  
+            
+            // Update order total
+            DB::table('orders')->where('id', $orderId)->update([
+                'total_price' => $totalPrice,
                 'updated_at' => now(),
             ]);
-
-            // 3. deduct stock
-            $product->stock -= $item['quantity'];
-            DB::table('products')->where('id', $product->id)->update(['stock' => $product->stock]);
-
-            $totalPrice += $subtotal;
-        }
-
-        // // 4. update order total
-        DB::table('orders')->where('id', $orderId)->update([
-            'total_price' => $totalPrice,
-            'updated_at' => now(),
-        ]);
-
-        DB::commit();
-
-        return $this->sendResponse([
-            'order_id' => $orderId,
-            'total_price' => $totalPrice
-        ], 'Order created successfully.');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-
+        });
+        
+        return $this->sendResponse([], 'Order created/updated successfully');
+        
+    } catch(\Exception $e){
         return $this->sendError('Failed: ' . $e->getMessage(), [], 500);
     }
 }
@@ -129,7 +154,7 @@ class OrderController extends BaseController
         ->get();
 
     $order->items = $items;
-    
+
     return $this->sendResponse($order, 'Order retrieved successfully.');
    }
 }
